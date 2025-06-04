@@ -1,17 +1,19 @@
 #!/bin/bash
-# Jalankan tmate secara otomatis saat container start
 
 # Generate SSH key jika belum ada
 if [ ! -f ~/.ssh/id_rsa ]; then
+    mkdir -p ~/.ssh
     ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa
 fi
 
-# Jalankan tmate dan cetak SSH connection string
-tmate -F &
-sleep 3
-tmate display -p '#{tmate_ssh}' > /tmp/tmate-ssh.txt
-echo "Connect via SSH:"
-cat /tmp/tmate-ssh.txt
+# Start tmate in the background
+tmate -F > /tmp/tmate.log 2>&1 &
 
-# Supaya container tetap jalan
+# Wait for tmate to initialize and print SSH string
+sleep 5
+TMATE_SSH=$(tmate display -p '#{tmate_ssh}')
+echo "Connect to this tmate session:"
+echo "$TMATE_SSH"
+
+# Keep container running
 tail -f /dev/null
